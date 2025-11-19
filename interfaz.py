@@ -665,197 +665,119 @@ class SurfaceIntegralFrame(ctk.CTkFrame):
             self.divergence_frame.pack(fill="both", expand=True, padx=8, pady=4)
     
     def create_green_frame(self, frame):
-        """Crea la interfaz para el Teorema de Green"""
+        """Crea la interfaz para el Teorema de Green - Layout horizontal"""
         # Información del teorema - más compacto
         info_frame = ctk.CTkFrame(frame, fg_color="#E8F5E9", corner_radius=8)
-        info_frame.pack(fill="x", padx=10, pady=(0, 8))
+        info_frame.pack(fill="x", padx=10, pady=(0, 6))
         
         info_label = ctk.CTkLabel(
             info_frame,
             text="Teorema de Green: ∮_C (P dx + Q dy) = ∬_D (∂Q/∂x - ∂P/∂y) dA",
             text_color="#2C3E50",
-            font=ctk.CTkFont(size=10, weight="bold"),
+            font=ctk.CTkFont(size=9, weight="bold"),
             wraplength=600
         )
-        info_label.pack(padx=10, pady=6)
+        info_label.pack(padx=10, pady=4)
         
-        # Campo vectorial - más compacto
-        vector_frame = ctk.CTkFrame(frame, fg_color="#F8F9FA", corner_radius=8)
-        vector_frame.pack(fill="x", padx=10, pady=(0, 8))
+        # Contenedor principal horizontal para aprovechar espacio
+        main_green_container = ctk.CTkFrame(frame, fg_color="transparent")
+        main_green_container.pack(fill="both", expand=True, padx=10, pady=(0, 6))
+        
+        # Lado izquierdo: Campo Vectorial
+        left_green = ctk.CTkFrame(main_green_container, fg_color="#F8F9FA", corner_radius=8)
+        left_green.pack(side="left", fill="both", expand=True, padx=(0, 5))
         
         vector_title = ctk.CTkLabel(
-            vector_frame, text="Campo Vectorial F = (P, Q)",
+            left_green, text="Campo Vectorial F = (P, Q)",
             text_color="#2C3E50",
-            font=ctk.CTkFont(size=11, weight="bold")
+            font=ctk.CTkFont(size=10, weight="bold")
         )
-        vector_title.pack(padx=10, pady=(6, 4), anchor="w")
+        vector_title.pack(padx=8, pady=(6, 4), anchor="w")
         
         # Componente P
-        p_frame = ctk.CTkFrame(vector_frame, fg_color="transparent")
-        p_frame.pack(fill="x", padx=10, pady=4)
-        
-        ctk.CTkLabel(
-            p_frame, text="P(x, y):",
-            text_color="#2C3E50",
-            font=ctk.CTkFont(size=11, weight="bold"),
-            width=80
-        ).pack(side="left", padx=(0, 8))
-        
-        self.green_P_entry = ctk.CTkEntry(
-            p_frame,
-            placeholder_text="Ej: x**2 + y",
-            fg_color="#FFFFFF",
-            border_color="#A8E6CF",
-            border_width=1,
-            text_color="#2C3E50",
-            font=ctk.CTkFont(size=11),
-            corner_radius=6,
-            height=30
-        )
+        p_frame = ctk.CTkFrame(left_green, fg_color="transparent")
+        p_frame.pack(fill="x", padx=8, pady=3)
+        ctk.CTkLabel(p_frame, text="P:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=10, weight="bold"), width=35).pack(side="left", padx=(0, 6))
+        self.green_P_entry = ctk.CTkEntry(p_frame, placeholder_text="x**2 + y",
+            fg_color="#FFFFFF", border_color="#A8E6CF", border_width=1,
+            text_color="#2C3E50", font=ctk.CTkFont(size=10), corner_radius=6, height=26)
         self.green_P_entry.pack(side="left", fill="x", expand=True)
         self.green_P_entry.insert(0, "x**2 - y**2")
         
         # Componente Q
-        q_frame = ctk.CTkFrame(vector_frame, fg_color="transparent")
-        q_frame.pack(fill="x", padx=10, pady=(4, 8))
-        
-        ctk.CTkLabel(
-            q_frame, text="Q(x, y):",
-            text_color="#2C3E50",
-            font=ctk.CTkFont(size=11, weight="bold"),
-            width=80
-        ).pack(side="left", padx=(0, 8))
-        
-        self.green_Q_entry = ctk.CTkEntry(
-            q_frame,
-            placeholder_text="Ej: 2*x*y",
-            fg_color="#FFFFFF",
-            border_color="#A8E6CF",
-            border_width=1,
-            text_color="#2C3E50",
-            font=ctk.CTkFont(size=11),
-            corner_radius=6,
-            height=30
-        )
+        q_frame = ctk.CTkFrame(left_green, fg_color="transparent")
+        q_frame.pack(fill="x", padx=8, pady=(3, 6))
+        ctk.CTkLabel(q_frame, text="Q:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=10, weight="bold"), width=35).pack(side="left", padx=(0, 6))
+        self.green_Q_entry = ctk.CTkEntry(q_frame, placeholder_text="2*x*y",
+            fg_color="#FFFFFF", border_color="#A8E6CF", border_width=1,
+            text_color="#2C3E50", font=ctk.CTkFont(size=10), corner_radius=6, height=26)
         self.green_Q_entry.pack(side="left", fill="x", expand=True)
         self.green_Q_entry.insert(0, "2*x*y")
         
-        # Región D - más compacto
-        region_frame = ctk.CTkFrame(frame, fg_color="#E8F5E9", corner_radius=8)
-        region_frame.pack(fill="x", padx=10, pady=(0, 8))
+        # Lado derecho: Región D
+        right_green = ctk.CTkFrame(main_green_container, fg_color="#E8F5E9", corner_radius=8)
+        right_green.pack(side="right", fill="both", expand=True, padx=(5, 0))
         
         region_title = ctk.CTkLabel(
-            region_frame, text="Región D (Límites de integración)",
+            right_green, text="Región D (Límites)",
             text_color="#2C3E50",
-            font=ctk.CTkFont(size=11, weight="bold")
+            font=ctk.CTkFont(size=10, weight="bold")
         )
-        region_title.pack(padx=10, pady=(6, 6), anchor="w")
+        region_title.pack(padx=8, pady=(6, 4), anchor="w")
         
-        limits_frame = ctk.CTkFrame(region_frame, fg_color="transparent")
-        limits_frame.pack(fill="x", padx=10, pady=(0, 6))
+        limits_frame = ctk.CTkFrame(right_green, fg_color="transparent")
+        limits_frame.pack(fill="both", expand=True, padx=8, pady=(0, 6))
         
-        # Límites de x
+        # Límites de x - en una línea compacta
         x_row = ctk.CTkFrame(limits_frame, fg_color="transparent")
-        x_row.pack(fill="x", pady=4)
-        
-        ctk.CTkLabel(
-            x_row, text="x:",
-            text_color="#2C3E50",
-            font=ctk.CTkFont(size=11, weight="bold"),
-            width=50,
-            anchor="w"
-        ).pack(side="left", padx=(0, 8))
-        
-        self.green_x_min = ctk.CTkEntry(
-            x_row, width=100,
-            fg_color="#FFFFFF",
-            border_color="#A8E6CF",
-            border_width=1,
-            text_color="#2C3E50",
-            font=ctk.CTkFont(size=11),
-            corner_radius=6,
-            height=28
-        )
-        self.green_x_min.pack(side="left", padx=4)
+        x_row.pack(fill="x", pady=2)
+        ctk.CTkLabel(x_row, text="x:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=9, weight="bold"), width=25).pack(side="left", padx=(0, 4))
+        self.green_x_min = ctk.CTkEntry(x_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.green_x_min.pack(side="left", padx=2, fill="x", expand=True)
         self.green_x_min.insert(0, "0")
-        
-        ctk.CTkLabel(
-            x_row, text="→",
-            text_color="#5A6C7D",
-            font=ctk.CTkFont(size=12, weight="bold"),
-            width=25
-        ).pack(side="left", padx=4)
-        
-        self.green_x_max = ctk.CTkEntry(
-            x_row, width=100,
-            fg_color="#FFFFFF",
-            border_color="#A8E6CF",
-            border_width=1,
-            text_color="#2C3E50",
-            font=ctk.CTkFont(size=11),
-            corner_radius=6,
-            height=28
-        )
-        self.green_x_max.pack(side="left", padx=4)
+        ctk.CTkLabel(x_row, text="→", text_color="#5A6C7D",
+                    font=ctk.CTkFont(size=9), width=12).pack(side="left", padx=1)
+        self.green_x_max = ctk.CTkEntry(x_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.green_x_max.pack(side="left", padx=2, fill="x", expand=True)
         self.green_x_max.insert(0, "1")
         
-        # Límites de y
+        # Límites de y - en una línea compacta
         y_row = ctk.CTkFrame(limits_frame, fg_color="transparent")
-        y_row.pack(fill="x", pady=4)
-        
-        ctk.CTkLabel(
-            y_row, text="y:",
-            text_color="#2C3E50",
-            font=ctk.CTkFont(size=11, weight="bold"),
-            width=50,
-            anchor="w"
-        ).pack(side="left", padx=(0, 8))
-        
-        self.green_y_min = ctk.CTkEntry(
-            y_row, width=100,
-            fg_color="#FFFFFF",
-            border_color="#A8E6CF",
-            border_width=1,
-            text_color="#2C3E50",
-            font=ctk.CTkFont(size=11),
-            corner_radius=6,
-            height=28
-        )
-        self.green_y_min.pack(side="left", padx=4)
+        y_row.pack(fill="x", pady=2)
+        ctk.CTkLabel(y_row, text="y:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=9, weight="bold"), width=25).pack(side="left", padx=(0, 4))
+        self.green_y_min = ctk.CTkEntry(y_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.green_y_min.pack(side="left", padx=2, fill="x", expand=True)
         self.green_y_min.insert(0, "0")
-        
-        ctk.CTkLabel(
-            y_row, text="→",
-            text_color="#5A6C7D",
-            font=ctk.CTkFont(size=12, weight="bold"),
-            width=25
-        ).pack(side="left", padx=4)
-        
-        self.green_y_max = ctk.CTkEntry(
-            y_row, width=100,
-            fg_color="#FFFFFF",
-            border_color="#A8E6CF",
-            border_width=1,
-            text_color="#2C3E50",
-            font=ctk.CTkFont(size=11),
-            corner_radius=6,
-            height=28
-        )
-        self.green_y_max.pack(side="left", padx=4)
+        ctk.CTkLabel(y_row, text="→", text_color="#5A6C7D",
+                    font=ctk.CTkFont(size=9), width=12).pack(side="left", padx=1)
+        self.green_y_max = ctk.CTkEntry(y_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.green_y_max.pack(side="left", padx=2, fill="x", expand=True)
         self.green_y_max.insert(0, "1")
         
-        # Botón calcular - más compacto
+        # Botón calcular - compacto
         calc_button = ctk.CTkButton(
             frame, text="Calcular con Teorema de Green",
             command=self.calculate_green,
             fg_color="#A8E6CF",
             hover_color="#95D9C4",
             text_color="#2C3E50",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            font=ctk.CTkFont(size=11, weight="bold"),
             corner_radius=8,
-            height=36
+            height=34
         )
-        calc_button.pack(pady=(6, 8), padx=10, fill="x")
+        calc_button.pack(pady=(4, 6), padx=10, fill="x")
     
     def create_stokes_frame(self, frame):
         """Crea la interfaz para el Teorema de Stokes - Layout compacto"""
