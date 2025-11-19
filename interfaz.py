@@ -125,7 +125,12 @@ class TripleIntegralFrame(ctk.CTkFrame):
         self.result_tabview = ctk.CTkTabview(
             result_container,
             fg_color="#FFFFFF",
-            corner_radius=8
+            corner_radius=8,
+            segmented_button_fg_color="#E8F5E9",
+            segmented_button_selected_color="#A8E6CF",
+            segmented_button_unselected_color="#FFFFFF",
+            segmented_button_selected_hover_color="#95D9C4",
+            segmented_button_unselected_hover_color="#F0F0F0"
         )
         self.result_tabview.pack(padx=12, pady=(0, 8), fill="both", expand=True)
         
@@ -144,8 +149,7 @@ class TripleIntegralFrame(ctk.CTkFrame):
             font=ctk.CTkFont(size=11)
         )
         self.result_text.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
-        self.result_text.insert("0.0", "💡 Nota: El orden de integración es d(variable interna) d(variable media) d(variable externa).\n"
-                                     "Las funciones de límite pueden usar las variables de las integrales más externas.")
+
         
         # Pestaña de gráfica
         self.plot_tab = self.result_tabview.add("📈 Gráfico")
@@ -171,6 +175,24 @@ class TripleIntegralFrame(ctk.CTkFrame):
         self.plot_widget_frame.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 8))
         self.plot_widget_frame.grid_columnconfigure(0, weight=1)
         self.plot_widget_frame.grid_rowconfigure(0, weight=1)
+        
+        # Configurar colores de texto después de agregar todas las pestañas
+        def configure_tab_text():
+            try:
+                # Acceder a los botones segmentados y cambiar el color del texto
+                for button in self.result_tabview._segmented_button._buttons_dict.values():
+                    button.configure(text_color="#2C3E50")
+            except:
+                try:
+                    # Método alternativo: acceder directamente a los botones
+                    for i in range(len(self.result_tabview._segmented_button._buttons_list)):
+                        btn = self.result_tabview._segmented_button._buttons_list[i]
+                        btn.configure(text_color="#2C3E50")
+                except:
+                    pass
+        
+        # Ejecutar después de que el widget se haya renderizado
+        self.master.after(100, configure_tab_text)
 
     def create_input_fields(self, parent_frame, var_names, func_example):
         entries = {}
@@ -517,9 +539,32 @@ class SurfaceIntegralFrame(ctk.CTkFrame):
         self.result_tabview = ctk.CTkTabview(
             result_container,
             fg_color="#FFFFFF",
-            corner_radius=8
+            corner_radius=8,
+            segmented_button_fg_color="#E8F5E9",
+            segmented_button_selected_color="#A8E6CF",
+            segmented_button_unselected_color="#FFFFFF",
+            segmented_button_selected_hover_color="#95D9C4",
+            segmented_button_unselected_hover_color="#F0F0F0"
         )
         self.result_tabview.pack(padx=12, pady=(0, 8), fill="both", expand=True)
+        
+        # Configurar colores de texto después de crear el tabview
+        def configure_tab_text():
+            try:
+                # Acceder a los botones segmentados y cambiar el color del texto
+                for button in self.result_tabview._segmented_button._buttons_dict.values():
+                    button.configure(text_color="#2C3E50")
+            except:
+                try:
+                    # Método alternativo: acceder directamente a los botones
+                    for i in range(len(self.result_tabview._segmented_button._buttons_list)):
+                        btn = self.result_tabview._segmented_button._buttons_list[i]
+                        btn.configure(text_color="#2C3E50")
+                except:
+                    pass
+        
+        # Ejecutar después de que el widget se haya renderizado
+        self.after(100, configure_tab_text)
         
         # Pestaña de resultados textuales
         self.text_tab = self.result_tabview.add("📝 Resultados")
@@ -561,6 +606,24 @@ class SurfaceIntegralFrame(ctk.CTkFrame):
         self.plot_widget_frame.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 8))
         self.plot_widget_frame.grid_columnconfigure(0, weight=1)
         self.plot_widget_frame.grid_rowconfigure(0, weight=1)
+        
+        # Configurar colores de texto después de agregar todas las pestañas
+        def configure_tab_text():
+            try:
+                # Acceder a los botones segmentados y cambiar el color del texto
+                for button in self.result_tabview._segmented_button._buttons_dict.values():
+                    button.configure(text_color="#2C3E50")
+            except:
+                try:
+                    # Método alternativo: acceder directamente a los botones
+                    for i in range(len(self.result_tabview._segmented_button._buttons_list)):
+                        btn = self.result_tabview._segmented_button._buttons_list[i]
+                        btn.configure(text_color="#2C3E50")
+                except:
+                    pass
+        
+        # Ejecutar después de que el widget se haya renderizado
+        self.master.after(100, configure_tab_text)
     
     def switch_theorem(self, theorem):
         """Cambia entre los diferentes teoremas"""
