@@ -408,3 +408,139 @@ class MathBackend:
         except Exception as e:
             print(f"Error al graficar superficie de Stokes: {e}")
             return None
+
+    def solve_divergence_theorem(self, P_str, Q_str, R_str, volume_limits):
+        """
+        Resuelve el Teorema de Divergencia:
+        ∬_S F · n dS = ∭_V div(F) dV
+        
+        Para una región rectangular V con límites en x, y, z:
+        - P_str, Q_str, R_str: Componentes del campo vectorial F = (P, Q, R)
+        - volume_limits: Diccionario con:
+            'x': límites (x_min, x_max)
+            'y': límites (y_min, y_max)
+            'z': límites (z_min, z_max)
+        """
+        try:
+            P = self._parse_expression(P_str)
+            Q = self._parse_expression(Q_str)
+            R = self._parse_expression(R_str)
+            
+            # Calcular la divergencia: div(F) = ∂P/∂x + ∂Q/∂y + ∂R/∂z
+            dP_dx = sp.diff(P, self.x)
+            dQ_dy = sp.diff(Q, self.y)
+            dR_dz = sp.diff(R, self.z)
+            
+            divergence = dP_dx + dQ_dy + dR_dz
+            
+            # Simplificar la divergencia
+            divergence = sp.simplify(divergence)
+            
+            # Obtener límites
+            lim_x = [self._parse_expression(l) for l in volume_limits['x']]
+            lim_y = [self._parse_expression(l) for l in volume_limits['y']]
+            lim_z = [self._parse_expression(l) for l in volume_limits['z']]
+            
+            # Calcular la integral triple
+            integral = sp.integrate(
+                divergence,
+                (self.z, lim_z[0], lim_z[1]),
+                (self.y, lim_y[0], lim_y[1]),
+                (self.x, lim_x[0], lim_x[1])
+            )
+            
+            # Construir el proceso
+            proceso = (
+                f"Teorema de Divergencia:\n"
+                f"∬_S F · n dS = ∭_V div(F) dV\n\n"
+                f"Campo vectorial: F = ({P}, {Q}, {R})\n"
+                f"Divergencia: div(F) = ∂P/∂x + ∂Q/∂y + ∂R/∂z\n"
+                f"∂P/∂x = {dP_dx}\n"
+                f"∂Q/∂y = {dQ_dy}\n"
+                f"∂R/∂z = {dR_dz}\n"
+                f"div(F) = {divergence}\n\n"
+                f"Integral triple:\n"
+                f"∫({lim_x[0]})→({lim_x[1]}) ∫({lim_y[0]})→({lim_y[1]}) ∫({lim_z[0]})→({lim_z[1]}) [{divergence}] dz dy dx"
+            )
+            
+            return {
+                "proceso": proceso,
+                "resultado_simbolico": str(integral),
+                "resultado_numerico": f"{integral.evalf():.4f}" if integral.is_number else "N/A",
+                "divergence": str(divergence),
+                "dP_dx": str(dP_dx),
+                "dQ_dy": str(dQ_dy),
+                "dR_dz": str(dR_dz)
+            }
+        except Exception as e:
+            return {"error": f"Error en el cálculo del Teorema de Divergencia: {e}"}
+
+    def plot_divergence_region(self, volume_limits):
+        """
+        Grafica la región sólida V para el Teorema de Divergencia
+        """
+        try:
+            lim_x = [self._parse_expression(l) for l in volume_limits['x']]
+            lim_y = [self._parse_expression(l) for l in volume_limits['y']]
+            lim_z = [self._parse_expression(l) for l in volume_limits['z']]
+            
+            x_min = float(lim_x[0].evalf())
+            x_max = float(lim_x[1].evalf())
+            y_min = float(lim_y[0].evalf())
+            y_max = float(lim_y[1].evalf())
+            z_min = float(lim_z[0].evalf())
+            z_max = float(lim_z[1].evalf())
+            
+            # Crear malla para las caras del cubo
+            X, Y = np.meshgrid(np.linspace(x_min, x_max, 20), 
+                              np.linspace(y_min, y_max, 20))
+            
+            fig = plt.figure(figsize=(12, 9))
+            ax = fig.add_subplot(111, projection='3d')
+            
+            # Graficar las 6 caras del cubo
+            # Cara inferior (z = z_min)
+            ax.plot_surface(X, Y, np.full_like(X, z_min), 
+                          color='blue', alpha=0.3, label='Cara z=z_min')
+            
+            # Cara superior (z = z_max)
+            ax.plot_surface(X, Y, np.full_like(X, z_max), 
+                          color='green', alpha=0.3, label='Cara z=z_max')
+            
+            # Caras laterales
+            X_z, Z = np.meshgrid(np.linspace(x_min, x_max, 20),
+                                np.linspace(z_min, z_max, 20))
+            Y_z_min = np.full_like(X_z, y_min)
+            Y_z_max = np.full_like(X_z, y_max)
+            
+            ax.plot_surface(X_z, Y_z_min, Z, color='red', alpha=0.3)
+            ax.plot_surface(X_z, Y_z_max, Z, color='orange', alpha=0.3)
+            
+            Y_y, Z_y = np.meshgrid(np.linspace(y_min, y_max, 20),
+                                  np.linspace(z_min, z_max, 20))
+            X_y_min = np.full_like(Y_y, x_min)
+            X_y_max = np.full_like(Y_y, x_max)
+            
+            ax.plot_surface(X_y_min, Y_y, Z_y, color='purple', alpha=0.3)
+            ax.plot_surface(X_y_max, Y_y, Z_y, color='cyan', alpha=0.3)
+            
+            # Dibujar bordes más visibles
+            # Bordes del cubo
+            ax.plot3D([x_min, x_max, x_max, x_min, x_min],
+                     [y_min, y_min, y_max, y_max, y_min],
+                     [z_min, z_min, z_min, z_min, z_min],
+                     'b-', linewidth=2, label='Borde inferior')
+            ax.plot3D([x_min, x_max, x_max, x_min, x_min],
+                     [y_min, y_min, y_max, y_max, y_min],
+                     [z_max, z_max, z_max, z_max, z_max],
+                     'g-', linewidth=2, label='Borde superior')
+            
+            ax.set_xlabel("Eje X", fontsize=11)
+            ax.set_ylabel("Eje Y", fontsize=11)
+            ax.set_zlabel("Eje Z", fontsize=11)
+            ax.set_title("Región V del Teorema de Divergencia", fontsize=13, fontweight='bold')
+            
+            return fig
+        except Exception as e:
+            print(f"Error al graficar región de Divergencia: {e}")
+            return None

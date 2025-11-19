@@ -944,14 +944,148 @@ class SurfaceIntegralFrame(ctk.CTkFrame):
         calc_button.pack(pady=(4, 6), padx=10, fill="x")
     
     def create_divergence_frame(self, frame):
-        """Crea la interfaz para el Teorema de Divergencia"""
+        """Crea la interfaz para el Teorema de Divergencia - Layout compacto"""
+        # Información del teorema - muy compacta
+        info_frame = ctk.CTkFrame(frame, fg_color="#E8F5E9", corner_radius=8)
+        info_frame.pack(fill="x", padx=10, pady=(0, 6))
+        
         info_label = ctk.CTkLabel(
-            frame,
-            text="Teorema de Divergencia\n\n(Próximamente)",
+            info_frame,
+            text="Teorema de Divergencia: ∬_S F · n dS = ∭_V div(F) dV",
             text_color="#2C3E50",
-            font=ctk.CTkFont(size=14, weight="bold")
+            font=ctk.CTkFont(size=9, weight="bold"),
+            wraplength=600
         )
-        info_label.pack(pady=50, padx=20)
+        info_label.pack(padx=10, pady=4)
+        
+        # Contenedor principal horizontal para aprovechar espacio
+        main_div_container = ctk.CTkFrame(frame, fg_color="transparent")
+        main_div_container.pack(fill="both", expand=True, padx=10, pady=(0, 6))
+        
+        # Lado izquierdo: Campo Vectorial
+        left_div = ctk.CTkFrame(main_div_container, fg_color="#F8F9FA", corner_radius=8)
+        left_div.pack(side="left", fill="both", expand=True, padx=(0, 5))
+        
+        vector_title = ctk.CTkLabel(
+            left_div, text="Campo Vectorial F = (P, Q, R)",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=10, weight="bold")
+        )
+        vector_title.pack(padx=8, pady=(6, 4), anchor="w")
+        
+        # Componente P
+        p_frame = ctk.CTkFrame(left_div, fg_color="transparent")
+        p_frame.pack(fill="x", padx=8, pady=3)
+        ctk.CTkLabel(p_frame, text="P:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=10, weight="bold"), width=35).pack(side="left", padx=(0, 6))
+        self.div_P_entry = ctk.CTkEntry(p_frame, placeholder_text="x",
+            fg_color="#FFFFFF", border_color="#A8E6CF", border_width=1,
+            text_color="#2C3E50", font=ctk.CTkFont(size=10), corner_radius=6, height=26)
+        self.div_P_entry.pack(side="left", fill="x", expand=True)
+        self.div_P_entry.insert(0, "x")
+        
+        # Componente Q
+        q_frame = ctk.CTkFrame(left_div, fg_color="transparent")
+        q_frame.pack(fill="x", padx=8, pady=3)
+        ctk.CTkLabel(q_frame, text="Q:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=10, weight="bold"), width=35).pack(side="left", padx=(0, 6))
+        self.div_Q_entry = ctk.CTkEntry(q_frame, placeholder_text="y",
+            fg_color="#FFFFFF", border_color="#A8E6CF", border_width=1,
+            text_color="#2C3E50", font=ctk.CTkFont(size=10), corner_radius=6, height=26)
+        self.div_Q_entry.pack(side="left", fill="x", expand=True)
+        self.div_Q_entry.insert(0, "y")
+        
+        # Componente R
+        r_frame = ctk.CTkFrame(left_div, fg_color="transparent")
+        r_frame.pack(fill="x", padx=8, pady=(3, 6))
+        ctk.CTkLabel(r_frame, text="R:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=10, weight="bold"), width=35).pack(side="left", padx=(0, 6))
+        self.div_R_entry = ctk.CTkEntry(r_frame, placeholder_text="z",
+            fg_color="#FFFFFF", border_color="#A8E6CF", border_width=1,
+            text_color="#2C3E50", font=ctk.CTkFont(size=10), corner_radius=6, height=26)
+        self.div_R_entry.pack(side="left", fill="x", expand=True)
+        self.div_R_entry.insert(0, "z")
+        
+        # Lado derecho: Límites de la región V
+        right_div = ctk.CTkFrame(main_div_container, fg_color="#E8F5E9", corner_radius=8)
+        right_div.pack(side="right", fill="both", expand=True, padx=(5, 0))
+        
+        limits_title = ctk.CTkLabel(
+            right_div, text="Límites de la Región V",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=10, weight="bold")
+        )
+        limits_title.pack(padx=8, pady=(6, 4), anchor="w")
+        
+        limits_container = ctk.CTkFrame(right_div, fg_color="transparent")
+        limits_container.pack(fill="both", expand=True, padx=8, pady=(0, 6))
+        
+        # Límites de x - en una línea compacta
+        x_row = ctk.CTkFrame(limits_container, fg_color="transparent")
+        x_row.pack(fill="x", pady=2)
+        ctk.CTkLabel(x_row, text="x:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=9, weight="bold"), width=25).pack(side="left", padx=(0, 4))
+        self.div_x_min = ctk.CTkEntry(x_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.div_x_min.pack(side="left", padx=2, fill="x", expand=True)
+        self.div_x_min.insert(0, "0")
+        ctk.CTkLabel(x_row, text="→", text_color="#5A6C7D",
+                    font=ctk.CTkFont(size=9), width=12).pack(side="left", padx=1)
+        self.div_x_max = ctk.CTkEntry(x_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.div_x_max.pack(side="left", padx=2, fill="x", expand=True)
+        self.div_x_max.insert(0, "1")
+        
+        # Límites de y - en una línea compacta
+        y_row = ctk.CTkFrame(limits_container, fg_color="transparent")
+        y_row.pack(fill="x", pady=2)
+        ctk.CTkLabel(y_row, text="y:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=9, weight="bold"), width=25).pack(side="left", padx=(0, 4))
+        self.div_y_min = ctk.CTkEntry(y_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.div_y_min.pack(side="left", padx=2, fill="x", expand=True)
+        self.div_y_min.insert(0, "0")
+        ctk.CTkLabel(y_row, text="→", text_color="#5A6C7D",
+                    font=ctk.CTkFont(size=9), width=12).pack(side="left", padx=1)
+        self.div_y_max = ctk.CTkEntry(y_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.div_y_max.pack(side="left", padx=2, fill="x", expand=True)
+        self.div_y_max.insert(0, "1")
+        
+        # Límites de z - en una línea compacta
+        z_row = ctk.CTkFrame(limits_container, fg_color="transparent")
+        z_row.pack(fill="x", pady=2)
+        ctk.CTkLabel(z_row, text="z:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=9, weight="bold"), width=25).pack(side="left", padx=(0, 4))
+        self.div_z_min = ctk.CTkEntry(z_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.div_z_min.pack(side="left", padx=2, fill="x", expand=True)
+        self.div_z_min.insert(0, "0")
+        ctk.CTkLabel(z_row, text="→", text_color="#5A6C7D",
+                    font=ctk.CTkFont(size=9), width=12).pack(side="left", padx=1)
+        self.div_z_max = ctk.CTkEntry(z_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.div_z_max.pack(side="left", padx=2, fill="x", expand=True)
+        self.div_z_max.insert(0, "1")
+        
+        # Botón calcular - compacto
+        calc_button = ctk.CTkButton(
+            frame, text="Calcular con Teorema de Divergencia",
+            command=self.calculate_divergence,
+            fg_color="#A8E6CF",
+            hover_color="#95D9C4",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            corner_radius=8,
+            height=34
+        )
+        calc_button.pack(pady=(4, 6), padx=10, fill="x")
     
     def calculate_green(self):
         """Calcula usando el Teorema de Green"""
@@ -1082,6 +1216,80 @@ class SurfaceIntegralFrame(ctk.CTkFrame):
     
     def show_plot_stokes(self, fig):
         """Muestra la gráfica de la superficie de Stokes en la interfaz"""
+        # Limpiar canvas anterior si existe
+        if self.current_plot_canvas:
+            self.current_plot_canvas.get_tk_widget().destroy()
+            plt.close(self.current_plot_canvas.figure)
+            self.current_plot_canvas = None
+        
+        # Cambiar a la pestaña de gráfico automáticamente
+        self.result_tabview.set("📈 Gráfico")
+        
+        # Crear nuevo canvas en el frame de la interfaz
+        self.current_plot_canvas = FigureCanvasTkAgg(fig, master=self.plot_widget_frame)
+        self.current_plot_canvas.draw()
+        self.current_plot_canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+    
+    def calculate_divergence(self):
+        """Calcula usando el Teorema de Divergencia"""
+        try:
+            # Obtener valores de los campos de entrada
+            P_str = self.div_P_entry.get().strip()
+            Q_str = self.div_Q_entry.get().strip()
+            R_str = self.div_R_entry.get().strip()
+            
+            # Verificar que los campos no estén vacíos
+            if not all([P_str, Q_str, R_str]):
+                self.result_text.delete("1.0", "end")
+                self.result_text.insert("1.0", "❌ Error: Por favor completa todos los campos")
+                return
+            
+            # Obtener límites
+            x_min = self.div_x_min.get().strip()
+            x_max = self.div_x_max.get().strip()
+            y_min = self.div_y_min.get().strip()
+            y_max = self.div_y_max.get().strip()
+            z_min = self.div_z_min.get().strip()
+            z_max = self.div_z_max.get().strip()
+            
+            if not all([x_min, x_max, y_min, y_max, z_min, z_max]):
+                self.result_text.delete("1.0", "end")
+                self.result_text.insert("1.0", "❌ Error: Por favor completa todos los límites")
+                return
+            
+            volume_limits = {
+                'x': (x_min, x_max),
+                'y': (y_min, y_max),
+                'z': (z_min, z_max)
+            }
+            
+            # Calcular el resultado
+            result = self.math_backend.solve_divergence_theorem(P_str, Q_str, R_str, volume_limits)
+            
+            # Mostrar el resultado
+            self.result_text.delete("1.0", "end")
+            if "error" in result:
+                self.result_text.insert("1.0", f"❌ {result['error']}")
+            else:
+                display_text = (
+                    f"{result['proceso']}\n\n"
+                    f"🔢 Resultado Simbólico:\n{result['resultado_simbolico']}\n\n"
+                    f"📊 Resultado Numérico:\n{result['resultado_numerico']}"
+                )
+                self.result_text.insert("1.0", display_text)
+                
+                # Graficar la región
+                figura = self.math_backend.plot_divergence_region(volume_limits)
+                if figura:
+                    self.show_plot_divergence(figura)
+        except Exception as e:
+            import traceback
+            error_msg = f"❌ Error inesperado:\n{str(e)}\n\n{traceback.format_exc()}"
+            self.result_text.delete("1.0", "end")
+            self.result_text.insert("1.0", error_msg)
+    
+    def show_plot_divergence(self, fig):
+        """Muestra la gráfica de la región de Divergencia en la interfaz"""
         # Limpiar canvas anterior si existe
         if self.current_plot_canvas:
             self.current_plot_canvas.get_tk_widget().destroy()
