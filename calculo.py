@@ -174,3 +174,60 @@ class MathBackend:
         except Exception as e:
             print(f"Error al graficar (esférico): {e}")
             return None
+
+    # --- TEOREMAS ---
+    def solve_green_theorem(self, P_str, Q_str, region_limits):
+        """
+        Resuelve el Teorema de Green:
+        ∮_C (P dx + Q dy) = ∬_D (∂Q/∂x - ∂P/∂y) dA
+        
+        Parámetros:
+        - P_str: Componente P del campo vectorial (función de x, y)
+        - Q_str: Componente Q del campo vectorial (función de x, y)
+        - region_limits: Diccionario con límites de la región D
+            {'x': (x_min, x_max), 'y': (y_min, y_max)}
+        """
+        try:
+            P = self._parse_expression(P_str)
+            Q = self._parse_expression(Q_str)
+            
+            # Calcular las derivadas parciales
+            dQ_dx = sp.diff(Q, self.x)
+            dP_dy = sp.diff(P, self.y)
+            
+            # Calcular el integrando: ∂Q/∂x - ∂P/∂y
+            integrando = dQ_dx - dP_dy
+            
+            # Obtener límites de la región
+            lim_x = [self._parse_expression(l) for l in region_limits['x']]
+            lim_y = [self._parse_expression(l) for l in region_limits['y']]
+            
+            # Calcular la integral doble
+            integral = sp.integrate(
+                integrando, 
+                (self.y, lim_y[0], lim_y[1]), 
+                (self.x, lim_x[0], lim_x[1])
+            )
+            
+            # Construir el proceso
+            proceso = (
+                f"Teorema de Green:\n"
+                f"∮_C (P dx + Q dy) = ∬_D (∂Q/∂x - ∂P/∂y) dA\n\n"
+                f"Campo vectorial: F = ({P}, {Q})\n"
+                f"∂Q/∂x = {dQ_dx}\n"
+                f"∂P/∂y = {dP_dy}\n"
+                f"Integrando: {integrando}\n\n"
+                f"Integral doble:\n"
+                f"∫({lim_x[0]})→({lim_x[1]}) ∫({lim_y[0]})→({lim_y[1]}) [{integrando}] dy dx"
+            )
+            
+            return {
+                "proceso": proceso,
+                "resultado_simbolico": str(integral),
+                "resultado_numerico": f"{integral.evalf():.4f}" if integral.is_number else "N/A",
+                "integrando": str(integrando),
+                "dQ_dx": str(dQ_dx),
+                "dP_dy": str(dP_dy)
+            }
+        except Exception as e:
+            return {"error": f"Error en el cálculo del Teorema de Green: {e}"}

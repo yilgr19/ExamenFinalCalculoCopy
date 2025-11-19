@@ -384,12 +384,387 @@ class SurfaceIntegralFrame(ctk.CTkFrame):
     def __init__(self, master, math_backend):
         super().__init__(master, fg_color="#FFFFFF")
         self.math_backend = math_backend
-        self.label = ctk.CTkLabel(
-            self, text="Calculadora de Integrales de Superficie (Punto 2)\n\n(En construcción)", 
-            font=ctk.CTkFont(size=18),
+        self.current_plot_window = None
+        
+        # Contenedor principal
+        main_container = ctk.CTkFrame(self, fg_color="transparent")
+        main_container.pack(padx=15, pady=(10, 10), fill="both", expand=True)
+        
+        # Selector de teoremas
+        theorems_frame = ctk.CTkFrame(main_container, fg_color="#E8F5E9", corner_radius=10)
+        theorems_frame.pack(pady=(0, 15), fill="x")
+        
+        title_label = ctk.CTkLabel(
+            theorems_frame, text="Teoremas de Cálculo Vectorial",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=13, weight="bold")
+        )
+        title_label.pack(pady=(10, 8))
+        
+        buttons_container = ctk.CTkFrame(theorems_frame, fg_color="transparent")
+        buttons_container.pack(pady=(0, 10), padx=10, fill="x")
+        
+        self.btn_green = ctk.CTkButton(
+            buttons_container, text="Teorema de Green",
+            command=lambda: self.switch_theorem("Green"),
+            fg_color="#A8E6CF",
+            hover_color="#95D9C4",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            corner_radius=8,
+            height=36
+        )
+        self.btn_green.pack(side="left", expand=True, padx=4, pady=4)
+        
+        self.btn_stokes = ctk.CTkButton(
+            buttons_container, text="Teorema de Stokes",
+            command=lambda: self.switch_theorem("Stokes"),
+            fg_color="#FFFFFF",
+            hover_color="#F5F5F5",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            corner_radius=8,
+            height=36,
+            border_width=1,
+            border_color="#A8E6CF"
+        )
+        self.btn_stokes.pack(side="left", expand=True, padx=4, pady=4)
+        
+        self.btn_divergence = ctk.CTkButton(
+            buttons_container, text="Teorema de Divergencia",
+            command=lambda: self.switch_theorem("Divergence"),
+            fg_color="#FFFFFF",
+            hover_color="#F5F5F5",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            corner_radius=8,
+            height=36,
+            border_width=1,
+            border_color="#A8E6CF"
+        )
+        self.btn_divergence.pack(side="left", expand=True, padx=4, pady=4)
+        
+        # Contenedor para los frames de cada teorema
+        self.content_frame = ctk.CTkFrame(main_container, fg_color="#F8F9FA", corner_radius=8)
+        self.content_frame.pack(fill="both", expand=True, pady=(0, 10))
+        
+        # Crear frames para cada teorema
+        self.green_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        self.stokes_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        self.divergence_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        
+        self.create_green_frame(self.green_frame)
+        self.create_stokes_frame(self.stokes_frame)
+        self.create_divergence_frame(self.divergence_frame)
+        
+        # Mostrar el frame inicial
+        self.current_theorem = "Green"
+        self.switch_theorem("Green")
+        
+        # Sección de resultados
+        result_container = ctk.CTkFrame(self, fg_color="#E8F5E9", corner_radius=8)
+        result_container.pack(padx=15, pady=(0, 12), fill="both", expand=True)
+        
+        result_header = ctk.CTkFrame(result_container, fg_color="transparent")
+        result_header.pack(padx=12, pady=(10, 6), fill="x")
+        
+        self.result_label = ctk.CTkLabel(
+            result_header, text="📊 Resultado del Cálculo",
+            font=ctk.CTkFont(size=15, weight="bold"),
             text_color="#2C3E50"
         )
-        self.label.pack(pady=50, padx=20)
+        self.result_label.pack(side="left")
+        
+        self.result_text = ctk.CTkTextbox(
+            result_container, activate_scrollbars=True,
+            fg_color="#FFFFFF",
+            text_color="#2C3E50",
+            border_color="#A8E6CF",
+            border_width=1,
+            corner_radius=6,
+            font=ctk.CTkFont(size=11)
+        )
+        self.result_text.pack(padx=12, pady=(0, 10), fill="both", expand=True)
+        self.result_text.insert("0.0", "Selecciona un teorema y completa los campos para calcular.")
+    
+    def switch_theorem(self, theorem):
+        """Cambia entre los diferentes teoremas"""
+        self.current_theorem = theorem
+        
+        # Ocultar todos los frames
+        self.green_frame.pack_forget()
+        self.stokes_frame.pack_forget()
+        self.divergence_frame.pack_forget()
+        
+        # Actualizar estilos de botones
+        buttons = {
+            "Green": self.btn_green,
+            "Stokes": self.btn_stokes,
+            "Divergence": self.btn_divergence
+        }
+        
+        for name, btn in buttons.items():
+            if name == theorem:
+                btn.configure(
+                    fg_color="#A8E6CF",
+                    hover_color="#95D9C4",
+                    border_width=0
+                )
+            else:
+                btn.configure(
+                    fg_color="#FFFFFF",
+                    hover_color="#F5F5F5",
+                    border_width=1,
+                    border_color="#A8E6CF"
+                )
+        
+        # Mostrar el frame correspondiente
+        if theorem == "Green":
+            self.green_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        elif theorem == "Stokes":
+            self.stokes_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        elif theorem == "Divergence":
+            self.divergence_frame.pack(fill="both", expand=True, padx=10, pady=10)
+    
+    def create_green_frame(self, frame):
+        """Crea la interfaz para el Teorema de Green"""
+        # Información del teorema
+        info_frame = ctk.CTkFrame(frame, fg_color="#E8F5E9", corner_radius=8)
+        info_frame.pack(fill="x", padx=10, pady=(0, 10))
+        
+        info_label = ctk.CTkLabel(
+            info_frame,
+            text="Teorema de Green: ∮_C (P dx + Q dy) = ∬_D (∂Q/∂x - ∂P/∂y) dA",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            wraplength=600
+        )
+        info_label.pack(padx=10, pady=8)
+        
+        # Campo vectorial
+        vector_frame = ctk.CTkFrame(frame, fg_color="#F8F9FA", corner_radius=8)
+        vector_frame.pack(fill="x", padx=10, pady=(0, 10))
+        
+        vector_title = ctk.CTkLabel(
+            vector_frame, text="Campo Vectorial F = (P, Q)",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=12, weight="bold")
+        )
+        vector_title.pack(padx=10, pady=(8, 6), anchor="w")
+        
+        # Componente P
+        p_frame = ctk.CTkFrame(vector_frame, fg_color="transparent")
+        p_frame.pack(fill="x", padx=10, pady=4)
+        
+        ctk.CTkLabel(
+            p_frame, text="P(x, y):",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            width=80
+        ).pack(side="left", padx=(0, 8))
+        
+        self.green_P_entry = ctk.CTkEntry(
+            p_frame,
+            placeholder_text="Ej: x**2 + y",
+            fg_color="#FFFFFF",
+            border_color="#A8E6CF",
+            border_width=1,
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11),
+            corner_radius=6,
+            height=30
+        )
+        self.green_P_entry.pack(side="left", fill="x", expand=True)
+        self.green_P_entry.insert(0, "x**2 - y**2")
+        
+        # Componente Q
+        q_frame = ctk.CTkFrame(vector_frame, fg_color="transparent")
+        q_frame.pack(fill="x", padx=10, pady=(4, 8))
+        
+        ctk.CTkLabel(
+            q_frame, text="Q(x, y):",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            width=80
+        ).pack(side="left", padx=(0, 8))
+        
+        self.green_Q_entry = ctk.CTkEntry(
+            q_frame,
+            placeholder_text="Ej: 2*x*y",
+            fg_color="#FFFFFF",
+            border_color="#A8E6CF",
+            border_width=1,
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11),
+            corner_radius=6,
+            height=30
+        )
+        self.green_Q_entry.pack(side="left", fill="x", expand=True)
+        self.green_Q_entry.insert(0, "2*x*y")
+        
+        # Región D
+        region_frame = ctk.CTkFrame(frame, fg_color="#E8F5E9", corner_radius=8)
+        region_frame.pack(fill="x", padx=10, pady=(0, 10))
+        
+        region_title = ctk.CTkLabel(
+            region_frame, text="Región D (Límites de integración)",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=12, weight="bold")
+        )
+        region_title.pack(padx=10, pady=(8, 8), anchor="w")
+        
+        limits_frame = ctk.CTkFrame(region_frame, fg_color="transparent")
+        limits_frame.pack(fill="x", padx=10, pady=(0, 8))
+        
+        # Límites de x
+        x_row = ctk.CTkFrame(limits_frame, fg_color="transparent")
+        x_row.pack(fill="x", pady=4)
+        
+        ctk.CTkLabel(
+            x_row, text="x:",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            width=50,
+            anchor="w"
+        ).pack(side="left", padx=(0, 8))
+        
+        self.green_x_min = ctk.CTkEntry(
+            x_row, width=100,
+            fg_color="#FFFFFF",
+            border_color="#A8E6CF",
+            border_width=1,
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11),
+            corner_radius=6,
+            height=28
+        )
+        self.green_x_min.pack(side="left", padx=4)
+        self.green_x_min.insert(0, "0")
+        
+        ctk.CTkLabel(
+            x_row, text="→",
+            text_color="#5A6C7D",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            width=25
+        ).pack(side="left", padx=4)
+        
+        self.green_x_max = ctk.CTkEntry(
+            x_row, width=100,
+            fg_color="#FFFFFF",
+            border_color="#A8E6CF",
+            border_width=1,
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11),
+            corner_radius=6,
+            height=28
+        )
+        self.green_x_max.pack(side="left", padx=4)
+        self.green_x_max.insert(0, "1")
+        
+        # Límites de y
+        y_row = ctk.CTkFrame(limits_frame, fg_color="transparent")
+        y_row.pack(fill="x", pady=4)
+        
+        ctk.CTkLabel(
+            y_row, text="y:",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            width=50,
+            anchor="w"
+        ).pack(side="left", padx=(0, 8))
+        
+        self.green_y_min = ctk.CTkEntry(
+            y_row, width=100,
+            fg_color="#FFFFFF",
+            border_color="#A8E6CF",
+            border_width=1,
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11),
+            corner_radius=6,
+            height=28
+        )
+        self.green_y_min.pack(side="left", padx=4)
+        self.green_y_min.insert(0, "0")
+        
+        ctk.CTkLabel(
+            y_row, text="→",
+            text_color="#5A6C7D",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            width=25
+        ).pack(side="left", padx=4)
+        
+        self.green_y_max = ctk.CTkEntry(
+            y_row, width=100,
+            fg_color="#FFFFFF",
+            border_color="#A8E6CF",
+            border_width=1,
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11),
+            corner_radius=6,
+            height=28
+        )
+        self.green_y_max.pack(side="left", padx=4)
+        self.green_y_max.insert(0, "1")
+        
+        # Botón calcular
+        calc_button = ctk.CTkButton(
+            frame, text="Calcular con Teorema de Green",
+            command=self.calculate_green,
+            fg_color="#A8E6CF",
+            hover_color="#95D9C4",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            corner_radius=8,
+            height=36
+        )
+        calc_button.pack(pady=(8, 10), padx=10, fill="x")
+    
+    def create_stokes_frame(self, frame):
+        """Crea la interfaz para el Teorema de Stokes"""
+        info_label = ctk.CTkLabel(
+            frame,
+            text="Teorema de Stokes\n\n(Próximamente)",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        info_label.pack(pady=50, padx=20)
+    
+    def create_divergence_frame(self, frame):
+        """Crea la interfaz para el Teorema de Divergencia"""
+        info_label = ctk.CTkLabel(
+            frame,
+            text="Teorema de Divergencia\n\n(Próximamente)",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        info_label.pack(pady=50, padx=20)
+    
+    def calculate_green(self):
+        """Calcula usando el Teorema de Green"""
+        try:
+            P_str = self.green_P_entry.get()
+            Q_str = self.green_Q_entry.get()
+            
+            region_limits = {
+                'x': (self.green_x_min.get(), self.green_x_max.get()),
+                'y': (self.green_y_min.get(), self.green_y_max.get())
+            }
+            
+            result = self.math_backend.solve_green_theorem(P_str, Q_str, region_limits)
+            
+            self.result_text.delete("0.0", "end")
+            if "error" in result:
+                self.result_text.insert("0.0", result["error"])
+            else:
+                display_text = (
+                    f"{result['proceso']}\n\n"
+                    f"🔢 Resultado Simbólico:\n{result['resultado_simbolico']}\n\n"
+                    f"📊 Resultado Numérico:\n{result['resultado_numerico']}"
+                )
+                self.result_text.insert("0.0", display_text)
+        except Exception as e:
+            self.result_text.delete("0.0", "end")
+            self.result_text.insert("0.0", f"Error: {e}")
 
 class App(ctk.CTk):
     def __init__(self):
