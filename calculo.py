@@ -231,3 +231,44 @@ class MathBackend:
             }
         except Exception as e:
             return {"error": f"Error en el cálculo del Teorema de Green: {e}"}
+
+    def plot_green_region(self, region_limits):
+        """
+        Grafica la región D para el Teorema de Green
+        """
+        try:
+            lim_x = [self._parse_expression(l) for l in region_limits['x']]
+            lim_y = [self._parse_expression(l) for l in region_limits['y']]
+
+            x_min = float(lim_x[0].evalf())
+            x_max = float(lim_x[1].evalf())
+            y_min = float(lim_y[0].evalf())
+            y_max = float(lim_y[1].evalf())
+
+            fig, ax = plt.subplots(figsize=(10, 8))
+            
+            # Crear un rectángulo para la región
+            rect = plt.Rectangle((x_min, y_min), x_max - x_min, y_max - y_min,
+                               fill=True, color='lightblue', alpha=0.5, 
+                               edgecolor='darkblue', linewidth=2, label='Región D')
+            ax.add_patch(rect)
+            
+            # Dibujar el borde de la región (curva C)
+            x_border = [x_min, x_max, x_max, x_min, x_min]
+            y_border = [y_min, y_min, y_max, y_max, y_min]
+            ax.plot(x_border, y_border, 'b-', linewidth=2.5, label='Curva C (borde)')
+            
+            # Configurar ejes
+            ax.set_xlim(x_min - 0.5, x_max + 0.5)
+            ax.set_ylim(y_min - 0.5, y_max + 0.5)
+            ax.set_xlabel("Eje X", fontsize=12)
+            ax.set_ylabel("Eje Y", fontsize=12)
+            ax.set_title("Región D del Teorema de Green", fontsize=14, fontweight='bold')
+            ax.grid(True, alpha=0.3)
+            ax.legend(loc='upper right')
+            ax.set_aspect('equal', adjustable='box')
+            
+            return fig
+        except Exception as e:
+            print(f"Error al graficar región de Green: {e}")
+            return None
