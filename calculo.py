@@ -93,15 +93,15 @@ class MathBackend:
             Z_low = np.full_like(X, z_inf)
             Z_high = np.full_like(X, z_sup)
 
-            fig = plt.figure(figsize=(8, 7))
+            fig = plt.figure(figsize=(12, 9))
             ax = fig.add_subplot(111, projection='3d')
             ax.plot_surface(X, Y, Z_low, cmap='winter', alpha=0.7)
             ax.plot_surface(X, Y, Z_high, cmap='viridis', alpha=0.7)
 
-            ax.set_xlabel("Eje X")
-            ax.set_ylabel("Eje Y")
-            ax.set_zlabel("Eje Z")
-            ax.set_title("Dominio de Integración Rectangular")
+            ax.set_xlabel("Eje X", fontsize=11)
+            ax.set_ylabel("Eje Y", fontsize=11)
+            ax.set_zlabel("Eje Z", fontsize=11)
+            ax.set_title("Dominio de Integración Rectangular", fontsize=13, fontweight='bold')
             return fig
         except Exception as e:
             print(f"Error al graficar (rectangular): {e}")
@@ -131,15 +131,15 @@ class MathBackend:
             if np.isscalar(Z_high):
                 Z_high = np.full_like(R, float(Z_high))
 
-            fig = plt.figure(figsize=(8, 7))
+            fig = plt.figure(figsize=(12, 9))
             ax = fig.add_subplot(111, projection='3d')
             ax.plot_surface(X, Y, Z_low, cmap='winter', alpha=0.6)
             ax.plot_surface(X, Y, Z_high, cmap='viridis', alpha=0.6)
 
-            ax.set_xlabel("Eje X")
-            ax.set_ylabel("Eje Y")
-            ax.set_zlabel("Eje Z")
-            ax.set_title("Dominio de Integración Cilíndrico")
+            ax.set_xlabel("Eje X", fontsize=11)
+            ax.set_ylabel("Eje Y", fontsize=11)
+            ax.set_zlabel("Eje Z", fontsize=11)
+            ax.set_title("Dominio de Integración Cilíndrico", fontsize=13, fontweight='bold')
             return fig
         except Exception as e:
             print(f"Error al graficar (cilíndrico): {e}")
@@ -162,14 +162,14 @@ class MathBackend:
             Y = RHO * np.sin(PHI) * np.sin(THETA)
             Z = RHO * np.cos(PHI)
 
-            fig = plt.figure(figsize=(8, 7))
+            fig = plt.figure(figsize=(12, 9))
             ax = fig.add_subplot(111, projection='3d')
             ax.plot_surface(X, Y, Z, cmap='magma', alpha=0.8)
 
-            ax.set_xlabel("Eje X")
-            ax.set_ylabel("Eje Y")
-            ax.set_zlabel("Eje Z")
-            ax.set_title("Dominio de Integración Esférico")
+            ax.set_xlabel("Eje X", fontsize=11)
+            ax.set_ylabel("Eje Y", fontsize=11)
+            ax.set_zlabel("Eje Z", fontsize=11)
+            ax.set_title("Dominio de Integración Esférico", fontsize=13, fontweight='bold')
             return fig
         except Exception as e:
             print(f"Error al graficar (esférico): {e}")

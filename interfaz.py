@@ -13,12 +13,15 @@ class TripleIntegralFrame(ctk.CTkFrame):
         super().__init__(master, fg_color="#FFFFFF")
         self.math_backend = math_backend
         self.grid_columnconfigure(0, weight=1)
-        self.current_plot_window = None  # Para rastrear ventanas de gráficos
+        self.grid_rowconfigure(0, weight=1)   # Sección superior compacta
+        self.grid_rowconfigure(1, weight=4)   # Dar mucho más peso a la sección de resultados
+        self.current_plot_window = None  # Para rastrear ventanas de gráficos (ya no se usa)
         self.current_mode = "Rectangulares"  # Modo actual
+        self.current_plot_canvas = None  # Canvas de matplotlib integrado
 
-        # Contenedor principal con layout de dos columnas optimizado
+        # Contenedor principal con layout de dos columnas optimizado - más compacto
         main_container = ctk.CTkFrame(self, fg_color="transparent")
-        main_container.pack(padx=15, pady=(10, 10), fill="both", expand=True)
+        main_container.grid(row=0, column=0, sticky="nsew", padx=15, pady=(6, 4))
         
         # Columna izquierda: Selector mejorado con mejor distribución
         left_column = ctk.CTkFrame(main_container, fg_color="transparent", width=200)
@@ -34,11 +37,11 @@ class TripleIntegralFrame(ctk.CTkFrame):
             text_color="#2C3E50",
             font=ctk.CTkFont(size=13, weight="bold")
         )
-        title_label.pack(pady=(12, 10))
+        title_label.pack(pady=(8, 6))
         
-        # Botones en layout más espaciado y elegante
+        # Botones en layout más compacto
         buttons_container = ctk.CTkFrame(selector_frame, fg_color="transparent")
-        buttons_container.pack(pady=(0, 12), padx=10, fill="x")
+        buttons_container.pack(pady=(0, 8), padx=10, fill="x")
         
         self.btn_rect = ctk.CTkButton(
             buttons_container, text="Rectangulares",
@@ -48,10 +51,10 @@ class TripleIntegralFrame(ctk.CTkFrame):
             text_color="#2C3E50",
             font=ctk.CTkFont(size=11, weight="bold"),
             corner_radius=8,
-            height=36,
+            height=32,
             width=180
         )
-        self.btn_rect.pack(pady=4, fill="x")
+        self.btn_rect.pack(pady=2, fill="x")
         
         self.btn_cyl = ctk.CTkButton(
             buttons_container, text="Cilíndricas",
@@ -61,12 +64,12 @@ class TripleIntegralFrame(ctk.CTkFrame):
             text_color="#2C3E50",
             font=ctk.CTkFont(size=11, weight="bold"),
             corner_radius=8,
-            height=36,
+            height=32,
             width=180,
             border_width=1,
             border_color="#A8E6CF"
         )
-        self.btn_cyl.pack(pady=4, fill="x")
+        self.btn_cyl.pack(pady=2, fill="x")
         
         self.btn_sph = ctk.CTkButton(
             buttons_container, text="Esféricas",
@@ -76,12 +79,12 @@ class TripleIntegralFrame(ctk.CTkFrame):
             text_color="#2C3E50",
             font=ctk.CTkFont(size=11, weight="bold"),
             corner_radius=8,
-            height=36,
+            height=32,
             width=180,
             border_width=1,
             border_color="#A8E6CF"
         )
-        self.btn_sph.pack(pady=4, fill="x")
+        self.btn_sph.pack(pady=2, fill="x")
         
         # Columna derecha: Contenido (límites y botón) - más espacio
         right_column = ctk.CTkFrame(main_container, fg_color="transparent")
@@ -103,12 +106,13 @@ class TripleIntegralFrame(ctk.CTkFrame):
         # Mostrar el frame inicial
         self.switch_mode("Rectangulares")
 
-        # Sección de resultados - optimizada para más espacio
+        # Sección de resultados - usando pestañas para mejor organización
+        # Dar más prioridad a esta sección con menos padding superior
         result_container = ctk.CTkFrame(self, fg_color="#E8F5E9", corner_radius=8)
-        result_container.pack(padx=15, pady=(8, 12), fill="both", expand=True)
+        result_container.grid(row=1, column=0, sticky="nsew", padx=15, pady=(2, 12))
         
         result_header_frame = ctk.CTkFrame(result_container, fg_color="transparent")
-        result_header_frame.pack(padx=12, pady=(10, 6), fill="x")
+        result_header_frame.pack(padx=12, pady=(8, 4), fill="x")
         
         self.result_label = ctk.CTkLabel(
             result_header_frame, text="📊 Resultado del Cálculo", 
@@ -117,8 +121,21 @@ class TripleIntegralFrame(ctk.CTkFrame):
         )
         self.result_label.pack(side="left")
         
+        # Usar pestañas para separar resultados y gráfica
+        self.result_tabview = ctk.CTkTabview(
+            result_container,
+            fg_color="#FFFFFF",
+            corner_radius=8
+        )
+        self.result_tabview.pack(padx=12, pady=(0, 8), fill="both", expand=True)
+        
+        # Pestaña de resultados textuales
+        self.text_tab = self.result_tabview.add("📝 Resultados")
+        self.text_tab.grid_columnconfigure(0, weight=1)
+        self.text_tab.grid_rowconfigure(0, weight=1)
+        
         self.result_text = ctk.CTkTextbox(
-            result_container, activate_scrollbars=True,
+            self.text_tab, activate_scrollbars=True,
             fg_color="#FFFFFF",
             text_color="#2C3E50",
             border_color="#A8E6CF",
@@ -126,9 +143,34 @@ class TripleIntegralFrame(ctk.CTkFrame):
             corner_radius=6,
             font=ctk.CTkFont(size=11)
         )
-        self.result_text.pack(padx=12, pady=(0, 10), fill="both", expand=True)
+        self.result_text.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
         self.result_text.insert("0.0", "💡 Nota: El orden de integración es d(variable interna) d(variable media) d(variable externa).\n"
                                      "Las funciones de límite pueden usar las variables de las integrales más externas.")
+        
+        # Pestaña de gráfica
+        self.plot_tab = self.result_tabview.add("📈 Gráfico")
+        self.plot_tab.grid_columnconfigure(0, weight=1)
+        self.plot_tab.grid_rowconfigure(0, weight=1)
+        
+        # Frame para la gráfica
+        plot_frame = ctk.CTkFrame(self.plot_tab, fg_color="#FFFFFF", corner_radius=6)
+        plot_frame.grid(row=0, column=0, sticky="nsew", padx=8, pady=8)
+        plot_frame.grid_columnconfigure(0, weight=1)
+        plot_frame.grid_rowconfigure(1, weight=1)
+        
+        plot_label = ctk.CTkLabel(
+            plot_frame, text="📈 Gráfico del Dominio",
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color="#2C3E50"
+        )
+        plot_label.grid(row=0, column=0, pady=(8, 4))
+        
+        # Canvas para matplotlib - inicialmente vacío, más grande
+        self.plot_canvas = None
+        self.plot_widget_frame = ctk.CTkFrame(plot_frame, fg_color="transparent")
+        self.plot_widget_frame.grid(row=1, column=0, sticky="nsew", padx=8, pady=(0, 8))
+        self.plot_widget_frame.grid_columnconfigure(0, weight=1)
+        self.plot_widget_frame.grid_rowconfigure(0, weight=1)
 
     def create_input_fields(self, parent_frame, var_names, func_example):
         entries = {}
@@ -136,17 +178,17 @@ class TripleIntegralFrame(ctk.CTkFrame):
         # Función - más compacta
         func_container = ctk.CTkFrame(
             parent_frame, fg_color="#E8F5E9", corner_radius=8)
-        func_container.pack(fill="x", padx=10, pady=(10, 10))
+        func_container.pack(fill="x", padx=10, pady=(6, 6))
         
         func_label = ctk.CTkLabel(
             func_container, text=f"Función f({', '.join(var_names)}):",
             text_color="#2C3E50",
-            font=ctk.CTkFont(size=12, weight="bold")
+            font=ctk.CTkFont(size=11, weight="bold")
         )
-        func_label.pack(padx=10, pady=(8, 5), anchor="w")
+        func_label.pack(padx=10, pady=(6, 4), anchor="w")
         
         func_entry_frame = ctk.CTkFrame(func_container, fg_color="transparent")
-        func_entry_frame.pack(fill="x", padx=10, pady=(0, 8))
+        func_entry_frame.pack(fill="x", padx=10, pady=(0, 6))
         
         entries['func'] = ctk.CTkEntry(
             func_entry_frame, placeholder_text=f"Ej: {func_example}",
@@ -156,24 +198,24 @@ class TripleIntegralFrame(ctk.CTkFrame):
             text_color="#2C3E50",
             font=ctk.CTkFont(size=11),
             corner_radius=6,
-            height=32
+            height=28
         )
         entries['func'].pack(fill="x", expand=True)
         
-        # Límites - layout optimizado en grid para mejor uso del espacio
+        # Límites - layout optimizado en grid para mejor uso del espacio - más compacto
         limits_container = ctk.CTkFrame(
             parent_frame, fg_color="#F8F9FA", corner_radius=8)
-        limits_container.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+        limits_container.pack(fill="both", expand=True, padx=10, pady=(0, 6))
         
         limits_title = ctk.CTkLabel(
             limits_container, text="Límites de Integración",
             text_color="#2C3E50",
-            font=ctk.CTkFont(size=12, weight="bold")
+            font=ctk.CTkFont(size=11, weight="bold")
         )
-        limits_title.pack(padx=10, pady=(8, 8), anchor="w")
+        limits_title.pack(padx=10, pady=(6, 6), anchor="w")
         
         limits_frame = ctk.CTkFrame(limits_container, fg_color="transparent")
-        limits_frame.pack(fill="both", expand=True, padx=10, pady=(0, 8))
+        limits_frame.pack(fill="both", expand=True, padx=10, pady=(0, 6))
         
         # Layout optimizado: grid para aprovechar mejor el espacio
         for i, var in enumerate(var_names):
@@ -194,17 +236,17 @@ class TripleIntegralFrame(ctk.CTkFrame):
                 text_color="#2C3E50",
                 font=ctk.CTkFont(size=11),
                 corner_radius=6,
-                height=28
+                height=26
             )
-            entries[f'{var}_low'].grid(row=i, column=1, padx=4, pady=4, sticky="ew")
+            entries[f'{var}_low'].grid(row=i, column=1, padx=4, pady=2, sticky="ew")
             
             arrow_label = ctk.CTkLabel(
                 limits_frame, text="→",
                 text_color="#5A6C7D",
-                font=ctk.CTkFont(size=12, weight="bold"),
-                width=25
+                font=ctk.CTkFont(size=11, weight="bold"),
+                width=20
             )
-            arrow_label.grid(row=i, column=2, padx=4, pady=4)
+            arrow_label.grid(row=i, column=2, padx=2, pady=2)
             
             entries[f'{var}_high'] = ctk.CTkEntry(
                 limits_frame,
@@ -214,9 +256,9 @@ class TripleIntegralFrame(ctk.CTkFrame):
                 text_color="#2C3E50",
                 font=ctk.CTkFont(size=11),
                 corner_radius=6,
-                height=28
+                height=26
             )
-            entries[f'{var}_high'].grid(row=i, column=3, padx=4, pady=4, sticky="ew")
+            entries[f'{var}_high'].grid(row=i, column=3, padx=4, pady=2, sticky="ew")
         
         # Configurar columnas para que se expandan
         limits_frame.grid_columnconfigure(1, weight=1)
@@ -241,7 +283,7 @@ class TripleIntegralFrame(ctk.CTkFrame):
             corner_radius=8,
             height=36
         )
-        button.pack(pady=(8, 10), padx=10, fill="x")
+        button.pack(pady=(4, 6), padx=10, fill="x")
 
     def create_cylindrical_tab(self, frame):
         self.cyl_entries = self.create_input_fields(frame, ['z', 'r', 'theta'], "r**2 * sin(theta)")
@@ -259,7 +301,7 @@ class TripleIntegralFrame(ctk.CTkFrame):
             corner_radius=8,
             height=36
         )
-        button.pack(pady=(8, 10), padx=10, fill="x")
+        button.pack(pady=(4, 6), padx=10, fill="x")
 
     def create_spherical_tab(self, frame):
         self.sph_entries = self.create_input_fields(frame, ['rho', 'phi', 'theta'], "rho**2 * cos(phi)")
@@ -277,7 +319,7 @@ class TripleIntegralFrame(ctk.CTkFrame):
             corner_radius=8,
             height=36
         )
-        button.pack(pady=(8, 10), padx=10, fill="x")
+        button.pack(pady=(4, 6), padx=10, fill="x")
 
     def switch_mode(self, mode):
         """Cambia entre los diferentes modos de coordenadas"""
@@ -310,13 +352,13 @@ class TripleIntegralFrame(ctk.CTkFrame):
                     border_color="#A8E6CF"
                 )
         
-        # Mostrar el frame correspondiente - sin padding extra
+        # Mostrar el frame correspondiente - más compacto
         if mode == "Rectangulares":
-            self.rect_frame.pack(fill="both", expand=True, padx=8, pady=8)
+            self.rect_frame.pack(fill="both", expand=True, padx=8, pady=4)
         elif mode == "Cilíndricas":
-            self.cyl_frame.pack(fill="both", expand=True, padx=8, pady=8)
+            self.cyl_frame.pack(fill="both", expand=True, padx=8, pady=4)
         elif mode == "Esféricas":
-            self.sph_frame.pack(fill="both", expand=True, padx=8, pady=8)
+            self.sph_frame.pack(fill="both", expand=True, padx=8, pady=4)
 
     def on_calculate(self):
         current_tab = self.current_mode
@@ -358,33 +400,26 @@ class TripleIntegralFrame(ctk.CTkFrame):
                 self.show_plot_window(figura)
 
     def show_plot_window(self, fig):
-        # Cerrar ventana anterior si existe
-        if self.current_plot_window and self.current_plot_window.winfo_exists():
-            self.current_plot_window.destroy()
+        # Limpiar canvas anterior si existe
+        if self.current_plot_canvas:
+            self.current_plot_canvas.get_tk_widget().destroy()
+            plt.close(self.current_plot_canvas.figure)
+            self.current_plot_canvas = None
         
-        plot_window = ctk.CTkToplevel(self)
-        plot_window.title("Gráfico del Dominio")
-        plot_window.geometry("600x600")
-        plot_window.configure(fg_color="#F8F9FA")
-        self.current_plot_window = plot_window
+        # Cambiar a la pestaña de gráfico automáticamente
+        self.result_tabview.set("📈 Gráfico")
         
-        # Manejar el cierre de la ventana
-        def on_close():
-            plt.close(fig)
-            plot_window.destroy()
-            self.current_plot_window = None
-        
-        plot_window.protocol("WM_DELETE_WINDOW", on_close)
-
-        canvas = FigureCanvasTkAgg(fig, master=plot_window)
-        canvas.draw()
-        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        # Crear nuevo canvas en el frame de la interfaz
+        self.current_plot_canvas = FigureCanvasTkAgg(fig, master=self.plot_widget_frame)
+        self.current_plot_canvas.draw()
+        self.current_plot_canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
 
 class SurfaceIntegralFrame(ctk.CTkFrame):
     def __init__(self, master, math_backend):
         super().__init__(master, fg_color="#FFFFFF")
         self.math_backend = math_backend
         self.current_plot_window = None
+        self.current_plot_canvas = None  # Canvas de matplotlib integrado
         
         # Contenedor principal
         main_container = ctk.CTkFrame(self, fg_color="transparent")
@@ -770,7 +805,7 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Calculadora de Cálculo Multivariado")
-        self.geometry("800x700")
+        self.geometry("1200x850")
         ctk.set_appearance_mode("light")
         self.configure(fg_color="#F8F9FA")
         self.math_backend = MathBackend()
