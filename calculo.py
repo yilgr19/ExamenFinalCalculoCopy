@@ -272,3 +272,139 @@ class MathBackend:
         except Exception as e:
             print(f"Error al graficar región de Green: {e}")
             return None
+
+    def solve_stokes_theorem(self, P_str, Q_str, R_str, surface_params):
+        """
+        Resuelve el Teorema de Stokes:
+        ∮_C F · dr = ∬_S curl(F) · dS
+        
+        Para una superficie z = f(x, y) con límites en x e y:
+        - P_str, Q_str, R_str: Componentes del campo vectorial F = (P, Q, R)
+        - surface_params: Diccionario con:
+            'z': función z(x, y) que define la superficie
+            'x': límites (x_min, x_max)
+            'y': límites (y_min, y_max)
+        """
+        try:
+            # Obtener la función de superficie z = f(x, y)
+            z_surface_str = surface_params['z']
+            z_surface = self._parse_expression(z_surface_str)
+            
+            # Sustituir z en las componentes del campo vectorial
+            P = self._parse_expression(P_str).subs(self.z, z_surface)
+            Q = self._parse_expression(Q_str).subs(self.z, z_surface)
+            R = self._parse_expression(R_str).subs(self.z, z_surface)
+            
+            # Calcular el rotacional: curl(F) = (∂R/∂y - ∂Q/∂z, ∂P/∂z - ∂R/∂x, ∂Q/∂x - ∂P/∂y)
+            # Después de sustituir z, las derivadas respecto a z son 0
+            dR_dy = sp.diff(R, self.y)
+            dQ_dz = sp.Integer(0)  # Después de sustituir z, no hay dependencia explícita
+            
+            dP_dz = sp.Integer(0)
+            dR_dx = sp.diff(R, self.x)
+            
+            dQ_dx = sp.diff(Q, self.x)
+            dP_dy = sp.diff(P, self.y)
+            
+            curl_x = dR_dy - dQ_dz  # ∂R/∂y - ∂Q/∂z
+            curl_y = dP_dz - dR_dx  # ∂P/∂z - ∂R/∂x
+            curl_z = dQ_dx - dP_dy  # ∂Q/∂x - ∂P/∂y
+            
+            # Calcular el vector normal (simplificado para z = f(x,y))
+            # Para superficie z = f(x,y), el vector normal hacia arriba es:
+            # n = (-∂z/∂x, -∂z/∂y, 1) / sqrt(1 + (∂z/∂x)² + (∂z/∂y)²)
+            dz_dx = sp.diff(z_surface, self.x)
+            dz_dy = sp.diff(z_surface, self.y)
+            
+            # Para z = f(x,y), la integral de superficie del rotacional es:
+            # ∬ curl(F) · n dS = ∬ [curl_x(-∂z/∂x) + curl_y(-∂z/∂y) + curl_z] dx dy
+            
+            integrando = curl_x * (-dz_dx) + curl_y * (-dz_dy) + curl_z
+            
+            # Simplificar el integrando
+            integrando = sp.simplify(integrando)
+            
+            # Obtener límites
+            lim_x = [self._parse_expression(l) for l in surface_params['x']]
+            lim_y = [self._parse_expression(l) for l in surface_params['y']]
+            
+            # Calcular la integral doble
+            integral = sp.integrate(
+                integrando,
+                (self.y, lim_y[0], lim_y[1]),
+                (self.x, lim_x[0], lim_x[1])
+            )
+            
+            # Construir el proceso
+            proceso = (
+                f"Teorema de Stokes:\n"
+                f"∮_C F · dr = ∬_S curl(F) · dS\n\n"
+                f"Campo vectorial: F = ({P_str}, {Q_str}, {R_str})\n"
+                f"Superficie: z = {z_surface}\n\n"
+                f"Rotacional:\n"
+                f"curl(F) = (∂R/∂y - ∂Q/∂z, ∂P/∂z - ∂R/∂x, ∂Q/∂x - ∂P/∂y)\n"
+                f"curl(F) = ({curl_x}, {curl_y}, {curl_z})\n\n"
+                f"Integrando: {integrando}\n\n"
+                f"Integral de superficie:\n"
+                f"∫({lim_x[0]})→({lim_x[1]}) ∫({lim_y[0]})→({lim_y[1]}) [{integrando}] dy dx"
+            )
+            
+            return {
+                "proceso": proceso,
+                "resultado_simbolico": str(integral),
+                "resultado_numerico": f"{integral.evalf():.4f}" if integral.is_number else "N/A",
+                "integrando": str(integrando),
+                "curl": (str(curl_x), str(curl_y), str(curl_z))
+            }
+        except Exception as e:
+            return {"error": f"Error en el cálculo del Teorema de Stokes: {e}"}
+
+    def plot_stokes_surface(self, surface_params):
+        """
+        Grafica la superficie para el Teorema de Stokes
+        """
+        try:
+            z_surface_str = surface_params['z']
+            z_surface = self._parse_expression(z_surface_str)
+            
+            lim_x = [self._parse_expression(l) for l in surface_params['x']]
+            lim_y = [self._parse_expression(l) for l in surface_params['y']]
+            
+            x_min = float(lim_x[0].evalf())
+            x_max = float(lim_x[1].evalf())
+            y_min = float(lim_y[0].evalf())
+            y_max = float(lim_y[1].evalf())
+            
+            # Crear malla
+            x = np.linspace(x_min, x_max, 30)
+            y = np.linspace(y_min, y_max, 30)
+            X, Y = np.meshgrid(x, y)
+            
+            # Evaluar z = f(x, y)
+            z_func = sp.lambdify((self.x, self.y), z_surface, 'numpy')
+            Z = z_func(X, Y)
+            
+            fig = plt.figure(figsize=(12, 9))
+            ax = fig.add_subplot(111, projection='3d')
+            
+            # Graficar la superficie
+            surf = ax.plot_surface(X, Y, Z, cmap='viridis', alpha=0.8, 
+                                  edgecolor='black', linewidth=0.3)
+            
+            # Agregar borde de la superficie (evaluar como arrays)
+            x_border = np.array([x_min, x_max, x_max, x_min, x_min])
+            y_border = np.array([y_min, y_min, y_max, y_max, y_min])
+            z_border = z_func(x_border, y_border)
+            ax.plot3D(x_border, y_border, z_border, 'r-', linewidth=2.5, label='Curva C (borde)')
+            
+            ax.set_xlabel("Eje X", fontsize=11)
+            ax.set_ylabel("Eje Y", fontsize=11)
+            ax.set_zlabel("Eje Z", fontsize=11)
+            ax.set_title("Superficie S del Teorema de Stokes", fontsize=13, fontweight='bold')
+            
+            fig.colorbar(surf, shrink=0.5, aspect=5)
+            
+            return fig
+        except Exception as e:
+            print(f"Error al graficar superficie de Stokes: {e}")
+            return None

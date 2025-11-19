@@ -795,14 +795,153 @@ class SurfaceIntegralFrame(ctk.CTkFrame):
         calc_button.pack(pady=(6, 8), padx=10, fill="x")
     
     def create_stokes_frame(self, frame):
-        """Crea la interfaz para el Teorema de Stokes"""
+        """Crea la interfaz para el Teorema de Stokes - Layout compacto"""
+        # Información del teorema - muy compacta
+        info_frame = ctk.CTkFrame(frame, fg_color="#E8F5E9", corner_radius=8)
+        info_frame.pack(fill="x", padx=10, pady=(0, 6))
+        
         info_label = ctk.CTkLabel(
-            frame,
-            text="Teorema de Stokes\n\n(Próximamente)",
+            info_frame,
+            text="Teorema de Stokes: ∮_C F · dr = ∬_S curl(F) · dS",
             text_color="#2C3E50",
-            font=ctk.CTkFont(size=14, weight="bold")
+            font=ctk.CTkFont(size=9, weight="bold"),
+            wraplength=600
         )
-        info_label.pack(pady=50, padx=20)
+        info_label.pack(padx=10, pady=4)
+        
+        # Contenedor principal horizontal para aprovechar espacio
+        main_stokes_container = ctk.CTkFrame(frame, fg_color="transparent")
+        main_stokes_container.pack(fill="both", expand=True, padx=10, pady=(0, 6))
+        
+        # Lado izquierdo: Campo Vectorial
+        left_stokes = ctk.CTkFrame(main_stokes_container, fg_color="#F8F9FA", corner_radius=8)
+        left_stokes.pack(side="left", fill="both", expand=True, padx=(0, 5))
+        
+        vector_title = ctk.CTkLabel(
+            left_stokes, text="Campo Vectorial F = (P, Q, R)",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=10, weight="bold")
+        )
+        vector_title.pack(padx=8, pady=(6, 4), anchor="w")
+        
+        # Componente P
+        p_frame = ctk.CTkFrame(left_stokes, fg_color="transparent")
+        p_frame.pack(fill="x", padx=8, pady=3)
+        ctk.CTkLabel(p_frame, text="P:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=10, weight="bold"), width=35).pack(side="left", padx=(0, 6))
+        self.stokes_P_entry = ctk.CTkEntry(p_frame, placeholder_text="y",
+            fg_color="#FFFFFF", border_color="#A8E6CF", border_width=1,
+            text_color="#2C3E50", font=ctk.CTkFont(size=10), corner_radius=6, height=26)
+        self.stokes_P_entry.pack(side="left", fill="x", expand=True)
+        self.stokes_P_entry.insert(0, "y")
+        
+        # Componente Q
+        q_frame = ctk.CTkFrame(left_stokes, fg_color="transparent")
+        q_frame.pack(fill="x", padx=8, pady=3)
+        ctk.CTkLabel(q_frame, text="Q:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=10, weight="bold"), width=35).pack(side="left", padx=(0, 6))
+        self.stokes_Q_entry = ctk.CTkEntry(q_frame, placeholder_text="z",
+            fg_color="#FFFFFF", border_color="#A8E6CF", border_width=1,
+            text_color="#2C3E50", font=ctk.CTkFont(size=10), corner_radius=6, height=26)
+        self.stokes_Q_entry.pack(side="left", fill="x", expand=True)
+        self.stokes_Q_entry.insert(0, "z")
+        
+        # Componente R
+        r_frame = ctk.CTkFrame(left_stokes, fg_color="transparent")
+        r_frame.pack(fill="x", padx=8, pady=(3, 6))
+        ctk.CTkLabel(r_frame, text="R:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=10, weight="bold"), width=35).pack(side="left", padx=(0, 6))
+        self.stokes_R_entry = ctk.CTkEntry(r_frame, placeholder_text="x",
+            fg_color="#FFFFFF", border_color="#A8E6CF", border_width=1,
+            text_color="#2C3E50", font=ctk.CTkFont(size=10), corner_radius=6, height=26)
+        self.stokes_R_entry.pack(side="left", fill="x", expand=True)
+        self.stokes_R_entry.insert(0, "x")
+        
+        # Lado derecho: Superficie y Región lado a lado (dos columnas)
+        right_stokes = ctk.CTkFrame(main_stokes_container, fg_color="transparent")
+        right_stokes.pack(side="right", fill="both", expand=True, padx=(5, 0))
+        
+        # Superficie - arriba
+        surface_frame = ctk.CTkFrame(right_stokes, fg_color="#E8F5E9", corner_radius=8)
+        surface_frame.pack(fill="x", pady=(0, 5))
+        
+        surface_title = ctk.CTkLabel(
+            surface_frame, text="Superficie: z(x,y)",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=10, weight="bold")
+        )
+        surface_title.pack(padx=8, pady=(5, 3), anchor="w")
+        
+        z_frame = ctk.CTkFrame(surface_frame, fg_color="transparent")
+        z_frame.pack(fill="x", padx=8, pady=(0, 5))
+        self.stokes_z_entry = ctk.CTkEntry(z_frame, placeholder_text="x + y",
+            fg_color="#FFFFFF", border_color="#A8E6CF", border_width=1,
+            text_color="#2C3E50", font=ctk.CTkFont(size=10), corner_radius=6, height=26)
+        self.stokes_z_entry.pack(fill="x")
+        self.stokes_z_entry.insert(0, "x + y")
+        
+        # Región de proyección - abajo
+        region_frame = ctk.CTkFrame(right_stokes, fg_color="#E8F5E9", corner_radius=8)
+        region_frame.pack(fill="x")
+        
+        region_title = ctk.CTkLabel(
+            region_frame, text="Límites xy",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=10, weight="bold")
+        )
+        region_title.pack(padx=8, pady=(5, 3), anchor="w")
+        
+        limits_container = ctk.CTkFrame(region_frame, fg_color="transparent")
+        limits_container.pack(fill="x", padx=8, pady=(0, 5))
+        
+        # Límites de x - en una línea compacta
+        x_row = ctk.CTkFrame(limits_container, fg_color="transparent")
+        x_row.pack(fill="x", pady=1)
+        ctk.CTkLabel(x_row, text="x:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=9, weight="bold"), width=25).pack(side="left", padx=(0, 4))
+        self.stokes_x_min = ctk.CTkEntry(x_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.stokes_x_min.pack(side="left", padx=2, fill="x", expand=True)
+        self.stokes_x_min.insert(0, "0")
+        ctk.CTkLabel(x_row, text="→", text_color="#5A6C7D",
+                    font=ctk.CTkFont(size=9), width=12).pack(side="left", padx=1)
+        self.stokes_x_max = ctk.CTkEntry(x_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.stokes_x_max.pack(side="left", padx=2, fill="x", expand=True)
+        self.stokes_x_max.insert(0, "1")
+        
+        # Límites de y - en una línea compacta
+        y_row = ctk.CTkFrame(limits_container, fg_color="transparent")
+        y_row.pack(fill="x", pady=1)
+        ctk.CTkLabel(y_row, text="y:", text_color="#2C3E50",
+                    font=ctk.CTkFont(size=9, weight="bold"), width=25).pack(side="left", padx=(0, 4))
+        self.stokes_y_min = ctk.CTkEntry(y_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.stokes_y_min.pack(side="left", padx=2, fill="x", expand=True)
+        self.stokes_y_min.insert(0, "0")
+        ctk.CTkLabel(y_row, text="→", text_color="#5A6C7D",
+                    font=ctk.CTkFont(size=9), width=12).pack(side="left", padx=1)
+        self.stokes_y_max = ctk.CTkEntry(y_row, fg_color="#FFFFFF",
+            border_color="#A8E6CF", border_width=1, text_color="#2C3E50",
+            font=ctk.CTkFont(size=9), corner_radius=5, height=24)
+        self.stokes_y_max.pack(side="left", padx=2, fill="x", expand=True)
+        self.stokes_y_max.insert(0, "1")
+        
+        # Botón calcular - compacto
+        calc_button = ctk.CTkButton(
+            frame, text="Calcular con Teorema de Stokes",
+            command=self.calculate_stokes,
+            fg_color="#A8E6CF",
+            hover_color="#95D9C4",
+            text_color="#2C3E50",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            corner_radius=8,
+            height=34
+        )
+        calc_button.pack(pady=(4, 6), padx=10, fill="x")
     
     def create_divergence_frame(self, frame):
         """Crea la interfaz para el Teorema de Divergencia"""
@@ -870,6 +1009,79 @@ class SurfaceIntegralFrame(ctk.CTkFrame):
     
     def show_plot_green(self, fig):
         """Muestra la gráfica de la región de Green en la interfaz"""
+        # Limpiar canvas anterior si existe
+        if self.current_plot_canvas:
+            self.current_plot_canvas.get_tk_widget().destroy()
+            plt.close(self.current_plot_canvas.figure)
+            self.current_plot_canvas = None
+        
+        # Cambiar a la pestaña de gráfico automáticamente
+        self.result_tabview.set("📈 Gráfico")
+        
+        # Crear nuevo canvas en el frame de la interfaz
+        self.current_plot_canvas = FigureCanvasTkAgg(fig, master=self.plot_widget_frame)
+        self.current_plot_canvas.draw()
+        self.current_plot_canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+    
+    def calculate_stokes(self):
+        """Calcula usando el Teorema de Stokes"""
+        try:
+            # Obtener valores de los campos de entrada
+            P_str = self.stokes_P_entry.get().strip()
+            Q_str = self.stokes_Q_entry.get().strip()
+            R_str = self.stokes_R_entry.get().strip()
+            z_str = self.stokes_z_entry.get().strip()
+            
+            # Verificar que los campos no estén vacíos
+            if not all([P_str, Q_str, R_str, z_str]):
+                self.result_text.delete("1.0", "end")
+                self.result_text.insert("1.0", "❌ Error: Por favor completa todos los campos")
+                return
+            
+            # Obtener límites
+            x_min = self.stokes_x_min.get().strip()
+            x_max = self.stokes_x_max.get().strip()
+            y_min = self.stokes_y_min.get().strip()
+            y_max = self.stokes_y_max.get().strip()
+            
+            if not all([x_min, x_max, y_min, y_max]):
+                self.result_text.delete("1.0", "end")
+                self.result_text.insert("1.0", "❌ Error: Por favor completa todos los límites")
+                return
+            
+            surface_params = {
+                'z': z_str,
+                'x': (x_min, x_max),
+                'y': (y_min, y_max)
+            }
+            
+            # Calcular el resultado
+            result = self.math_backend.solve_stokes_theorem(P_str, Q_str, R_str, surface_params)
+            
+            # Mostrar el resultado
+            self.result_text.delete("1.0", "end")
+            if "error" in result:
+                self.result_text.insert("1.0", f"❌ {result['error']}")
+            else:
+                display_text = (
+                    f"{result['proceso']}\n\n"
+                    f"🔢 Resultado Simbólico:\n{result['resultado_simbolico']}\n\n"
+                    f"📊 Resultado Numérico:\n{result['resultado_numerico']}"
+                )
+                self.result_text.insert("1.0", display_text)
+                
+                # Graficar la superficie
+                figura = self.math_backend.plot_stokes_surface(surface_params)
+                if figura:
+                    self.show_plot_stokes(figura)
+        except Exception as e:
+            import traceback
+            error_msg = f"❌ Error inesperado:\n{str(e)}\n\n{traceback.format_exc()}"
+            self.result_text.delete("1.0", "end")
+            self.result_text.insert("1.0", error_msg)
+    
+    def show_plot_stokes(self, fig):
+        """Muestra la gráfica de la superficie de Stokes en la interfaz"""
         # Limpiar canvas anterior si existe
         if self.current_plot_canvas:
             self.current_plot_canvas.get_tk_widget().destroy()
